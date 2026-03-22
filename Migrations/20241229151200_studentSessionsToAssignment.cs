@@ -1,0 +1,48 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace math4ktu_be.Migrations
+{
+    /// <inheritdoc />
+    public partial class studentSessionsToAssignment : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<int>(
+                name: "TestAssignmentId1",
+                table: "StudentTestSessions",
+                type: "int",
+                nullable: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentTestSessions_TestAssignmentId1",
+                table: "StudentTestSessions",
+                column: "TestAssignmentId1");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_StudentTestSessions_TestAssignments_TestAssignmentId1",
+                table: "StudentTestSessions",
+                column: "TestAssignmentId1",
+                principalTable: "TestAssignments",
+                principalColumn: "Id");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropForeignKey(
+                name: "FK_StudentTestSessions_TestAssignments_TestAssignmentId1",
+                table: "StudentTestSessions");
+
+            migrationBuilder.DropIndex(
+                name: "IX_StudentTestSessions_TestAssignmentId1",
+                table: "StudentTestSessions");
+
+            migrationBuilder.DropColumn(
+                name: "TestAssignmentId1",
+                table: "StudentTestSessions");
+        }
+    }
+}

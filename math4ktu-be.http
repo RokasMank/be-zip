@@ -1,0 +1,6 @@
+@math4ktu_be_HostAddress = http://localhost:5197
+
+GET {{math4ktu_be_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
