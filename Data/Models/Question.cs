@@ -11,7 +11,6 @@ public abstract class Question
     public string? ImageUrl { get; set; }
     public QuestionType QuestionType { get; set; }
     public List<string> CorrectAnswers { get; set; } = [];
-    public int Points { get; set; }
     public int? ParentQuestionId { get; set; }
     [JsonIgnore] // Prevents cyclic reference
 
@@ -19,6 +18,9 @@ public abstract class Question
     [JsonIgnore] // Prevents cyclic reference
 
     public List<Question> SubQuestions { get; set; } = [];
+
+    [JsonIgnore]
+    public List<TestQuestion> TestQuestions { get; set; } = [];
 
     public QuestionCategoryClass QuestionCategoryClass { get; set; }
     public ContentType ContentType { get; set; }

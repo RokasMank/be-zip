@@ -6,8 +6,8 @@ public class Test
     public string Title { get; set; } = string.Empty; // Test title
     public string Description { get; set; } = string.Empty; // Test instructions
     public TimeSpan? DefaultTimeLimit { get; set; } // Default time limit for the test
-    public List<Question> Questions { get; set; } = new(); // One-to-many relationship with questions
+    public List<TestQuestion> TestQuestions { get; set; } = new();
 
-    public int TotalPoints => Questions.Sum(q => q.Points); // Calculated total points
+    public int TotalPoints => TestQuestions.Sum(tq => tq.Points);
     public bool Published {  get; set; }
 }

@@ -130,13 +130,24 @@ public class TestAssignmentController : ControllerBase
             .Include(a => a.StudentsSessions)
             .ThenInclude(s => s.Student)
             .Include(a => a.Test)
-            .ThenInclude(t => t.Questions)
+            .ThenInclude(t => t.TestQuestions)
+                .ThenInclude(tq => tq.Question)
             .SingleOrDefaultAsync(a => a.Id == id);
 
         if (assignment == null)
         {
             return NotFound(new { Message = "Assignment not found." });
         }
+
+        var pointsByQuestionId = assignment.Test.TestQuestions
+            .GroupBy(tq => tq.QuestionId)
+            .ToDictionary(g => g.Key, g => g.First().Points);
+
+        var rootQuestions = assignment.Test.TestQuestions
+            .Select(tq => tq.Question)
+            .Where(q => q.ParentQuestionId == null)
+            .DistinctBy(q => q.Id)
+            .ToList();
 
         return Ok(new
         {
@@ -150,11 +161,11 @@ public class TestAssignmentController : ControllerBase
             {
                 assignment.Test.Title,
                 assignment.Test.Description,
-                Questions = assignment.Test.Questions.Select(q => new
+                Questions = rootQuestions.Select(q => new
                 {
                     q.Id,
                     q.Text,
-                    q.Points,
+                    Points = pointsByQuestionId.GetValueOrDefault(q.Id, 0),
                     q.QuestionType,
                     Options = q is MultipleChoiceQuestion mcq ? mcq.Options :
                              q is SingleChoiceQuestion scq ? scq.Options : new List<string>(),
@@ -344,8 +355,9 @@ public class TestAssignmentController : ControllerBase
             .Include(a => a.StudentsSessions)
                 .ThenInclude(s => s.Answers)
             .Include(a => a.Test)
-                .ThenInclude(t => t.Questions)
-                    .ThenInclude(q => q.SubQuestions)
+                .ThenInclude(t => t.TestQuestions)
+                    .ThenInclude(tq => tq.Question)
+                        .ThenInclude(q => q.SubQuestions)
             .SingleOrDefaultAsync(a => a.Id == assignmentId);
 
         if (assignment == null)
@@ -353,8 +365,20 @@ public class TestAssignmentController : ControllerBase
             return NotFound(new { Message = "Assignment not found." });
         }
 
+        var pointsByQuestionId = assignment.Test.TestQuestions
+            .GroupBy(tq => tq.QuestionId)
+            .ToDictionary(g => g.Key, g => g.First().Points);
+
+        var rootQuestions = assignment.Test.TestQuestions
+            .Select(tq => tq.Question)
+            .Where(q => q.ParentQuestionId == null)
+            .DistinctBy(q => q.Id)
+            .ToList();
+
         var headers = new List<string>();
-        GenerateHeaders(assignment.Test.Questions, headers, "K");
+        GenerateHeaders(rootQuestions, headers, "K");
+
+        var flatQuestions = FlattenQuestions(rootQuestions);
 
         var results = assignment.StudentsSessions
             .Where(s => s.SessionStatus == StudentSessionStatus.Finished)
@@ -367,14 +391,16 @@ public class TestAssignmentController : ControllerBase
                 StartTime = s.StartTime.ToString("yyyy-MM-dd HH:mm:ss"),
                 EndTime = s.EndTime.ToString("yyyy-MM-dd HH:mm:ss"),
                 Duration = (int)(s.EndTime - s.StartTime).TotalMinutes,
-                QuestionScores = FlattenQuestions(assignment.Test.Questions)
+                QuestionScores = flatQuestions
                     .Select(q =>
                     {
                         var answer = s.Answers.FirstOrDefault(a => a.QuestionId == q.Id);
-                        if (q.CorrectAnswers == null || !q.CorrectAnswers.Any())
+                        var points = pointsByQuestionId.GetValueOrDefault(q.Id, 0);
+                        if (points == 0)
                         {
                             return "N/A";
                         }
+
                         return answer != null ? answer.PointsEarned.ToString() : "0";
                     })
             }).ToList();

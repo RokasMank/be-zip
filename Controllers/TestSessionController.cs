@@ -23,13 +23,18 @@ public class TestSessionController : ControllerBase
     {
         var session = await _db.StudentTestSessions
             .Include(s => s.Test)
-                .ThenInclude(t => t.Questions)
+                .ThenInclude(t => t.TestQuestions)
+                    .ThenInclude(tq => tq.Question)
             .SingleOrDefaultAsync(s => s.Id == id);
 
         if (session == null)
         {
             return NotFound(new { Message = "Test session not found." });
         }
+
+        var pointsByQuestionId = session.Test.TestQuestions
+            .GroupBy(tq => tq.QuestionId)
+            .ToDictionary(g => g.Key, g => g.First().Points);
 
         var sessionDetails = new
         {
@@ -38,16 +43,20 @@ public class TestSessionController : ControllerBase
             {
                 session.Test.Title,
                 session.Test.Description,
-                Questions = session.Test.Questions.Select(q => new
-                {
-                    q.Id,
-                    q.Text,
-                    q.Points,
-                    q.QuestionType,
-                    Options = q is MultipleChoiceQuestion mcq ? mcq.Options :
-                             q is SingleChoiceQuestion scq ? scq.Options : [],
-                    CorrectAnswers = session.SessionStatus == StudentSessionStatus.Finished ? q.CorrectAnswers : null
-                }).ToList()
+                Questions = session.Test.TestQuestions
+                    .Select(tq => tq.Question)
+                    .Where(q => q.ParentQuestionId == null)
+                    .DistinctBy(q => q.Id)
+                    .Select(q => new
+                    {
+                        q.Id,
+                        q.Text,
+                        Points = pointsByQuestionId.GetValueOrDefault(q.Id, 0),
+                        q.QuestionType,
+                        Options = q is MultipleChoiceQuestion mcq ? mcq.Options :
+                                 q is SingleChoiceQuestion scq ? scq.Options : [],
+                        CorrectAnswers = session.SessionStatus == StudentSessionStatus.Finished ? q.CorrectAnswers : null
+                    }).ToList()
             },
             session.SessionStatus
         };
@@ -60,7 +69,6 @@ public class TestSessionController : ControllerBase
     {
         var session = await _db.StudentTestSessions
             .Include(s => s.Test)
-                .ThenInclude(t => t.Questions)
             .SingleOrDefaultAsync(s => s.Id == id);
 
         if (session == null)
@@ -84,6 +92,8 @@ public class TestSessionController : ControllerBase
 
         var studentTestSession = await _db.StudentTestSessions
             .Include(s => s.Answers)
+            .Include(s => s.Test)
+                .ThenInclude(t => t.TestQuestions)
             .SingleOrDefaultAsync(s => s.Id == request.StudentTestSessionId);
 
         if (studentTestSession == null)
@@ -95,6 +105,10 @@ public class TestSessionController : ControllerBase
         {
             return BadRequest(new { Message = "Test is already finished." });
         }
+
+        var pointsByQuestionId = studentTestSession.Test.TestQuestions
+            .GroupBy(tq => tq.QuestionId)
+            .ToDictionary(g => g.Key, g => g.First().Points);
 
         var allAnswers = FlattenAnswers(request.Answers);
 
@@ -120,7 +134,8 @@ public class TestSessionController : ControllerBase
 
                 // Partial credit formula
                 double credit = Math.Max(0, (double)correctlyAnswered / totalCorrectAnswers - (double)incorrectlyAnswered / totalCorrectAnswers);
-                pointsEarned = Math.Round(credit * question.Points, 2);
+                var questionPoints = pointsByQuestionId.GetValueOrDefault(question.Id, 0);
+                pointsEarned = Math.Round(credit * questionPoints, 2);
             }
 
             // Update or add answer
@@ -186,7 +201,7 @@ public class TestSessionController : ControllerBase
         var session = await _db.StudentTestSessions
             .Include(s => s.Answers)
             .Include(s => s.Test)
-                .ThenInclude(t => t.Questions)
+                .ThenInclude(t => t.TestQuestions)
             .SingleOrDefaultAsync(s => s.Id == id);
 
         if (session == null)
@@ -199,13 +214,9 @@ public class TestSessionController : ControllerBase
             return BadRequest(new { Message = "Test session is already completed." });
         }
 
-        var totalScore = session.Answers.Sum(answer =>
-        {
-            var question = session.Test.Questions.SingleOrDefault(q => q.Id == answer.QuestionId);
-            return answer.IsCorrect ? question?.Points ?? 0 : 0;
-        });
+        var totalScore = session.Answers.Sum(answer => answer.PointsEarned);
 
-        session.Score = totalScore;
+        session.Score = (int)Math.Round(totalScore);
         session.SessionStatus = StudentSessionStatus.Finished;
         session.EndTime = DateTimeOffset.Now;
 
@@ -219,8 +230,9 @@ public class TestSessionController : ControllerBase
     {
         var session = await _db.StudentTestSessions
             .Include(s => s.Test)
-                .ThenInclude(t => t.Questions)
-                    .ThenInclude(q => q.SubQuestions)
+                .ThenInclude(t => t.TestQuestions)
+                    .ThenInclude(tq => tq.Question)
+                        .ThenInclude(q => q.SubQuestions)
             .Include(s => s.Answers)
             .SingleOrDefaultAsync(s => s.Id == sessionId);
 
@@ -229,18 +241,31 @@ public class TestSessionController : ControllerBase
             return NotFound(new { Message = "Test session not found." });
         }
 
-        var results = GenerateResults(session.Test.Questions, session.Answers);
+        var pointsByQuestionId = session.Test.TestQuestions
+            .GroupBy(tq => tq.QuestionId)
+            .ToDictionary(g => g.Key, g => g.First().Points);
+
+        var rootQuestions = session.Test.TestQuestions
+            .Select(tq => tq.Question)
+            .Where(q => q.ParentQuestionId == null)
+            .DistinctBy(q => q.Id)
+            .ToList();
+
+        var results = GenerateResults(rootQuestions, session.Answers, pointsByQuestionId);
 
         return Ok(new
         {
             Title = session.Test.Title,
             Description = session.Test.Description,
-            TotalScore = session.Test.Questions.Sum(q => q.Points),
+            TotalScore = pointsByQuestionId.Values.Sum(),
             ScoreEarned = session.Answers.Sum(a => a.PointsEarned),
             Results = results
         });
     }
-    private List<QuestionResult> GenerateResults(IEnumerable<Question> questions, ICollection<StudentAnswer> answers)
+    private List<QuestionResult> GenerateResults(
+        IEnumerable<Question> questions,
+        ICollection<StudentAnswer> answers,
+        Dictionary<int, int> pointsByQuestionId)
     {
         var results = new List<QuestionResult>();
 
@@ -251,7 +276,7 @@ public class TestSessionController : ControllerBase
 
             // Recursively handle subquestions
             var subResults = question.SubQuestions.Any()
-                ? GenerateResults(question.SubQuestions, answers)
+                ? GenerateResults(question.SubQuestions, answers, pointsByQuestionId)
                 : null;
 
             // Construct the result object
@@ -261,7 +286,7 @@ public class TestSessionController : ControllerBase
                 {
                     Id = question.Id,
                     Text = question.Text,
-                    Points = question.Points,
+                    Points = pointsByQuestionId.GetValueOrDefault(question.Id, 0),
                     QuestionType = question.QuestionType,
                     Options = question switch
                     {
@@ -273,7 +298,7 @@ public class TestSessionController : ControllerBase
                 },
                 ProvidedAnswers = answer?.ProvidedAnswers ?? new List<string>(),
                 PointsEarned = (answer?.PointsEarned ?? 0) + (subResults?.Sum(sr => sr.PointsEarned) ?? 0),
-                IsCorrect = answer?.PointsEarned == question.Points,
+                IsCorrect = answer?.PointsEarned == pointsByQuestionId.GetValueOrDefault(question.Id, 0),
                 SubResults = subResults
             };
 

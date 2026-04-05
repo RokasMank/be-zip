@@ -7,6 +7,11 @@
     <RootNamespace>math4ktu_be</RootNamespace>
   </PropertyGroup>
 
+  <!-- Exclude the test project subfolder from the main project's compile glob -->
+  <ItemGroup>
+    <Compile Remove="math4ktu-be.Tests/**" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="CsvHelper" Version="33.0.1" />

@@ -38,14 +38,25 @@ public class TestController : ControllerBase
     public async Task<IActionResult> GetTest([FromRoute] int id)
     {
         var test = await _db.Tests
-            .Include(t => t.Questions)
-                .ThenInclude(q => q.SubQuestions) // Include subquestions recursively
+            .Include(t => t.TestQuestions)
+                .ThenInclude(tq => tq.Question)
+                    .ThenInclude(q => q.SubQuestions)
             .SingleOrDefaultAsync(t => t.Id == id);
 
         if (test == null)
         {
             return NotFound(new { Message = "Test not found." });
         }
+
+        var pointsByQuestionId = test.TestQuestions
+            .GroupBy(tq => tq.QuestionId)
+            .ToDictionary(g => g.Key, g => g.First().Points);
+
+        var rootQuestions = test.TestQuestions
+            .Select(tq => tq.Question)
+            .Where(q => q.ParentQuestionId == null)
+            .DistinctBy(q => q.Id)
+            .ToList();
 
         // Map the Test entity to TestDto, including recursive subquestions
         var testDto = new TestDto
@@ -54,20 +65,20 @@ public class TestController : ControllerBase
             Title = test.Title,
             Description = test.Description,
             Published = test.Published,
-            Questions = MapQuestionsWithSubQuestions(test.Questions)
+            Questions = MapQuestionsWithSubQuestions(rootQuestions, pointsByQuestionId)
         };
 
         return Ok(testDto);
     }
     // Could be reused probably
-    private List<QuestionDto> MapQuestionsWithSubQuestions(IEnumerable<Question> questions)
+    private List<QuestionDto> MapQuestionsWithSubQuestions(IEnumerable<Question> questions, Dictionary<int, int> pointsByQuestionId)
     {
         return questions.Select(q => new QuestionDto
         {
             Id = q.Id,
             Text = q.Text,
             TextWithBlanks = q is FillBlanksQuestion mc ? mc.TextWithBlanks : string.Empty,
-            Points = q.Points,
+            Points = pointsByQuestionId.GetValueOrDefault(q.Id, 0),
             ImageUrl = q.ImageUrl,
             QuestionType = q.QuestionType,
             Options = q is MultipleChoiceQuestion mcq ? mcq.Options :
@@ -75,7 +86,7 @@ public class TestController : ControllerBase
             MaxCharsAllowed = q is OpenEndedQuestion oeq ? oeq.MaxCharsAllowed : null, // Include MaxCharsAllowed for OpenEnded
             CorrectAnswers = q.CorrectAnswers,
             SubQuestions = q.SubQuestions != null && q.SubQuestions.Any()
-                ? MapQuestionsWithSubQuestions(q.SubQuestions) // Recursively map subquestions
+                ? MapQuestionsWithSubQuestions(q.SubQuestions, pointsByQuestionId) // Recursively map subquestions
                 : new List<QuestionDto>()
         }).ToList();
     }

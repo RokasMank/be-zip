@@ -3,7 +3,6 @@
 public class QuestionUpdateRequest
 {
     public string Text { get; set; }
-    public int? Points { get; set; }
     public List<string> CorrectAnswers { get; set; }
     public List<string> Options { get; set; }
 }

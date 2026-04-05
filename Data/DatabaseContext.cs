@@ -14,6 +14,7 @@ public class DatabaseContext : DbContext
     public DbSet<Administrator> Administrators { get; set; }
     public DbSet<Question> Questions { get; set; }
     public DbSet<Test> Tests { get; set; }
+    public DbSet<TestQuestion> TestQuestions { get; set; }
     public DbSet<TestAssignment> TestAssignments { get; set; }
     public DbSet<StudentTestSession> StudentTestSessions { get; set; }
     public DbSet<StudentAnswer> StudentAnswers { get; set; }
@@ -70,6 +71,22 @@ public class DatabaseContext : DbContext
       .WithMany()
       .HasForeignKey(sts => sts.TestAssignmentId)
       .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
+
+        modelBuilder.Entity<TestQuestion>()
+            .HasOne(tq => tq.Test)
+            .WithMany(t => t.TestQuestions)
+            .HasForeignKey(tq => tq.TestId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<TestQuestion>()
+            .HasOne(tq => tq.Question)
+            .WithMany(q => q.TestQuestions)
+            .HasForeignKey(tq => tq.QuestionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<TestQuestion>()
+            .HasIndex(tq => new { tq.TestId, tq.QuestionId })
+            .IsUnique();
     }
 
 }
