@@ -223,10 +223,8 @@ public class TestAssignmentController : ControllerBase
 
         foreach (var session in assignment.StudentsSessions)
         {
-            if (session.SessionStatus == StudentSessionStatus.Draft)
-            {
-                session.SessionStatus = StudentSessionStatus.Published;
-            }
+
+            session.SessionStatus = StudentSessionStatus.Published;
         }
 
         await _db.SaveChangesAsync();

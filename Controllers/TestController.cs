@@ -71,7 +71,7 @@ public class TestController : ControllerBase
         return Ok(testDto);
     }
     // Could be reused probably
-    private List<QuestionDto> MapQuestionsWithSubQuestions(IEnumerable<Question> questions, Dictionary<int, int> pointsByQuestionId)
+    private List<QuestionDto> MapQuestionsWithSubQuestions(IEnumerable<Question> questions, Dictionary<int, double> pointsByQuestionId)
     {
         return questions.Select(q => new QuestionDto
         {
@@ -162,7 +162,7 @@ public class TestController : ControllerBase
         public string Text { get; set; } = string.Empty;
         public string TextWithBlanks { get; set; } = string.Empty;
 
-        public int Points { get; set; }
+        public double Points { get; set; }
         public string ImageUrl { get; set; }
         public QuestionType QuestionType { get; set; }
         public List<string> Options { get; set; } = new();

@@ -27,3 +27,14 @@ public abstract class Question
     public AchievementArea AchievementArea { get; set; }
     public CognitiveArea CognitiveArea { get; set; }
 }
+
+
+public class TestQuestion
+{
+    public int Id { get; set; }
+    public int QuestionId { get; set; }
+    public int TestId { get; set; }
+    public double Points { get; set; }
+    public Test Test { get; set; }
+    public Question Question { get; set; }
+}

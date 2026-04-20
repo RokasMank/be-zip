@@ -133,7 +133,7 @@ public class TestSessionController : ControllerBase
                 int incorrectlyAnswered = providedAnswers.Count(pa => !correctAnswers.Contains(pa));
 
                 // Partial credit formula
-                double credit = Math.Max(0, (double)correctlyAnswered / totalCorrectAnswers - (double)incorrectlyAnswered / totalCorrectAnswers);
+                var credit = Math.Max(0, (double)correctlyAnswered / totalCorrectAnswers - (double)incorrectlyAnswered / totalCorrectAnswers);
                 var questionPoints = pointsByQuestionId.GetValueOrDefault(question.Id, 0);
                 pointsEarned = Math.Round(credit * questionPoints, 2);
             }
@@ -265,7 +265,7 @@ public class TestSessionController : ControllerBase
     private List<QuestionResult> GenerateResults(
         IEnumerable<Question> questions,
         ICollection<StudentAnswer> answers,
-        Dictionary<int, int> pointsByQuestionId)
+        Dictionary<int, double> pointsByQuestionId)
     {
         var results = new List<QuestionResult>();
 

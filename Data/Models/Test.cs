@@ -8,6 +8,6 @@ public class Test
     public TimeSpan? DefaultTimeLimit { get; set; } // Default time limit for the test
     public List<TestQuestion> TestQuestions { get; set; } = new();
 
-    public int TotalPoints => TestQuestions.Sum(tq => tq.Points);
+    public double TotalPoints => TestQuestions.Sum(tq => tq.Points);
     public bool Published {  get; set; }
 }

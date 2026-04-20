@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "math4ktu-be", "math4ktu-be.csproj", "{9843A5B0-5FC6-48E3-9DF3-D2AAD0A75F36}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "math4ktu-be.Tests", "math4ktu-be.Tests\math4ktu-be.Tests.csproj", "{D47E6C5B-46A4-43F7-8411-F7F51FF716B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "math4ktu-be", "math4ktu-be.csproj", "{9843A5B0-5FC6-48E3-9DF3-D2AAD0A75F36}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,18 +27,6 @@ Global
 		{9843A5B0-5FC6-48E3-9DF3-D2AAD0A75F36}.Release|x64.Build.0 = Release|Any CPU
 		{9843A5B0-5FC6-48E3-9DF3-D2AAD0A75F36}.Release|x86.ActiveCfg = Release|Any CPU
 		{9843A5B0-5FC6-48E3-9DF3-D2AAD0A75F36}.Release|x86.Build.0 = Release|Any CPU
-		{D47E6C5B-46A4-43F7-8411-F7F51FF716B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D47E6C5B-46A4-43F7-8411-F7F51FF716B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D47E6C5B-46A4-43F7-8411-F7F51FF716B5}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{D47E6C5B-46A4-43F7-8411-F7F51FF716B5}.Debug|x64.Build.0 = Debug|Any CPU
-		{D47E6C5B-46A4-43F7-8411-F7F51FF716B5}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{D47E6C5B-46A4-43F7-8411-F7F51FF716B5}.Debug|x86.Build.0 = Debug|Any CPU
-		{D47E6C5B-46A4-43F7-8411-F7F51FF716B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D47E6C5B-46A4-43F7-8411-F7F51FF716B5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D47E6C5B-46A4-43F7-8411-F7F51FF716B5}.Release|x64.ActiveCfg = Release|Any CPU
-		{D47E6C5B-46A4-43F7-8411-F7F51FF716B5}.Release|x64.Build.0 = Release|Any CPU
-		{D47E6C5B-46A4-43F7-8411-F7F51FF716B5}.Release|x86.ActiveCfg = Release|Any CPU
-		{D47E6C5B-46A4-43F7-8411-F7F51FF716B5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
