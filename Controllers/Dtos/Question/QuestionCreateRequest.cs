@@ -29,8 +29,5 @@ public class QuestionCreateRequest
     public ContentType ContentType { get; set; }
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public CognitiveArea CognitiveArea { get; set; }
-
-    [JsonConverter(typeof(JsonStringEnumConverter))]
     public AchievementArea AchievementArea { get; set; }
 }

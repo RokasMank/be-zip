@@ -2,7 +2,7 @@
 
 public enum AchievementArea
 {
-    AOne = 1,
-    ATwo = 2,
-    AThree = 3
+    KnowledgeUnderstandingArgumentation = 1,
+    MathematicalCommunication = 2,
+    ProblemSolving = 3
 }

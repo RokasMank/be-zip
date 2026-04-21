@@ -81,7 +81,6 @@ public class QuestionController : ControllerBase
         [FromQuery] QuestionType? questionType,
         [FromQuery] QuestionCategoryClass? questionCategoryClass,
         [FromQuery] ContentType? contentType,
-        [FromQuery] CognitiveArea? cognitiveArea,
         [FromQuery] AchievementArea? achievementArea)
     {
         var query = _db.Questions
@@ -102,11 +101,6 @@ public class QuestionController : ControllerBase
         if (contentType.HasValue)
         {
             query = query.Where(q => q.ContentType == contentType.Value);
-        }
-
-        if (cognitiveArea.HasValue)
-        {
-            query = query.Where(q => q.CognitiveArea == cognitiveArea.Value);
         }
 
         if (achievementArea.HasValue)
@@ -259,7 +253,6 @@ public class QuestionController : ControllerBase
             QuestionType = question.QuestionType,
             QuestionCategoryClass = question.QuestionCategoryClass,
             ContentType = question.ContentType,
-            CognitiveArea = question.CognitiveArea,
             AchievementArea = question.AchievementArea,
             Options = question switch
             {
@@ -325,7 +318,6 @@ public class QuestionController : ControllerBase
         question.Text = request.Text;
         question.ImageUrl = request.ImageUrl;
         question.AchievementArea = request.AchievementArea;
-        question.CognitiveArea = request.CognitiveArea;
         question.ContentType = request.ContentType;
         question.QuestionCategoryClass = request.QuestionCategoryClass;
 
@@ -363,7 +355,6 @@ public class QuestionController : ControllerBase
         public QuestionType QuestionType { get; set; }
         public QuestionCategoryClass QuestionCategoryClass { get; set; }
         public ContentType ContentType { get; set; }
-        public CognitiveArea CognitiveArea { get; set; }
         public AchievementArea AchievementArea { get; set; }
         public List<string> Options { get; set; } = [];
         public List<string> CorrectAnswers { get; set; } = [];

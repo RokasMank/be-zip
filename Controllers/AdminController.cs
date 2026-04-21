@@ -75,6 +75,14 @@ public class AdminController : ControllerBase
             return Unauthorized(new { Message = ex.Message });
         }
     }
+
+    [HttpGet("test")]
+    [AllowAnonymous]
+    public IActionResult Test()
+    {
+        return Ok(new { Message = "CORS test successful" });
+    }
+
     [HttpGet("liveness")]
     [AllowAnonymous]
     public async Task<IActionResult> Liveness()

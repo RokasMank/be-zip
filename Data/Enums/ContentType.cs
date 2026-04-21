@@ -2,7 +2,8 @@
 
 public enum ContentType
 {
-    CotOne = 1,
-    CotTwo = 2,
-    CotThree = 3
+    NumbersAndCalculations = 1,
+    ModelsAndRelationships = 2,
+    GeometryAndMeasurements = 3,
+    DataAndProbability = 4
 }

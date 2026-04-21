@@ -25,7 +25,6 @@ public abstract class Question
     public QuestionCategoryClass QuestionCategoryClass { get; set; }
     public ContentType ContentType { get; set; }
     public AchievementArea AchievementArea { get; set; }
-    public CognitiveArea CognitiveArea { get; set; }
 }
 
 
