@@ -23,9 +23,6 @@ public class QuestionCreateRequest
     public List<QuestionCreateRequest>? SubQuestions { get; set; } = [];
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public QuestionCategoryClass QuestionCategoryClass { get; set; }
-
-    [JsonConverter(typeof(JsonStringEnumConverter))]
     public ContentType ContentType { get; set; }
 
     [JsonConverter(typeof(JsonStringEnumConverter))]

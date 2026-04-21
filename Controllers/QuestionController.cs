@@ -79,7 +79,6 @@ public class QuestionController : ControllerBase
     [HttpGet("bank")]
     public async Task<IActionResult> GetQuestionBank(
         [FromQuery] QuestionType? questionType,
-        [FromQuery] QuestionCategoryClass? questionCategoryClass,
         [FromQuery] ContentType? contentType,
         [FromQuery] AchievementArea? achievementArea)
     {
@@ -91,11 +90,6 @@ public class QuestionController : ControllerBase
         if (questionType.HasValue)
         {
             query = query.Where(q => q.QuestionType == questionType.Value);
-        }
-
-        if (questionCategoryClass.HasValue)
-        {
-            query = query.Where(q => q.QuestionCategoryClass == questionCategoryClass.Value);
         }
 
         if (contentType.HasValue)
@@ -251,7 +245,6 @@ public class QuestionController : ControllerBase
             Text = question.Text,
             ImageUrl = question.ImageUrl,
             QuestionType = question.QuestionType,
-            QuestionCategoryClass = question.QuestionCategoryClass,
             ContentType = question.ContentType,
             AchievementArea = question.AchievementArea,
             Options = question switch
@@ -319,7 +312,6 @@ public class QuestionController : ControllerBase
         question.ImageUrl = request.ImageUrl;
         question.AchievementArea = request.AchievementArea;
         question.ContentType = request.ContentType;
-        question.QuestionCategoryClass = request.QuestionCategoryClass;
 
         if (request.SubQuestions != null)
         {
@@ -353,7 +345,6 @@ public class QuestionController : ControllerBase
         public string Text { get; set; } = string.Empty;
         public string? ImageUrl { get; set; }
         public QuestionType QuestionType { get; set; }
-        public QuestionCategoryClass QuestionCategoryClass { get; set; }
         public ContentType ContentType { get; set; }
         public AchievementArea AchievementArea { get; set; }
         public List<string> Options { get; set; } = [];

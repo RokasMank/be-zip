@@ -22,7 +22,6 @@ public abstract class Question
     [JsonIgnore]
     public List<TestQuestion> TestQuestions { get; set; } = [];
 
-    public QuestionCategoryClass QuestionCategoryClass { get; set; }
     public ContentType ContentType { get; set; }
     public AchievementArea AchievementArea { get; set; }
 }
